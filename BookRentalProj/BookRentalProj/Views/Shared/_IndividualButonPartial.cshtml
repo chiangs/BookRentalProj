@@ -1,7 +1,0 @@
-﻿@* This insantiates and reuses a generic button partial from the Model*@
-@model BookRentalProj.Models.IndividualButtonPartial
-
-<a type="button" class="btn btn-@Model.ButtonType btn-sm" href="@Url.Action(Model.Action)@Model.ActionParameter">
-    <span class="glyphicon glyphicon-@Model.Glyph"></span>
-    <span>@Model.Text</span>
-</a>
