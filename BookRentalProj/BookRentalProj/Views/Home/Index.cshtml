@@ -1,0 +1,29 @@
+﻿@model List<BookRentalProj.ViewModels.ThumbnailBoxViewModel>
+
+@{
+    ViewBag.Title = "Home Page";
+}
+@using (Html.BeginForm("Index", "Home", FormMethod.Get))
+{
+    <br />
+    @* Search Box and Button *@
+    <div class="row">
+        <div class="pull-right" style="padding-right: 15px;">
+            <button type="submit" value="Search" class="btn btn-sm btn-primary">
+                <span class="glyphicon glyphicon-search"></span> &nbsp; Search
+            </button>
+        </div>
+        <div class="pull-right">
+            @Html.Editor("search", new { htmlAttributes = new { @class = "form-control input-sm" } })
+        </div>
+    </div>
+
+    <br />
+}
+@* Display the thumbnail model for each section *@
+<div class="row">
+    @foreach (var section in Model)
+    {
+        @Html.Partial("_ThumbnailAreaPartial", section)
+    }
+</div>

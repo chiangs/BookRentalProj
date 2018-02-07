@@ -1,0 +1,30 @@
+﻿@model BookRentalProj.Models.Genre
+@{
+    ViewBag.Title = "Details";
+}
+
+<div>
+    <h3>Genre Details</h3>
+    <hr />
+    <div class="form-border">
+        <fieldset disabled>
+            <div class="row" style="padding-bottom: 5px; padding-top: 5px;">
+                <div class="col-md-2">
+                    @Html.LabelFor(x => x.Name, htmlAttributes: new { @class="control-label"})
+                </div>
+            
+                <div class="col-md-10">
+                    @Html.TextBoxFor(x => x.Name, new { @class="form-control"})
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+<br />
+
+@* Group action buttons, pass the current model's id number to the edit to bring up the right edit view *@
+<p>
+    @Html.Partial("_EditButtonPartial", Model.Id)
+    @Html.Partial("_BackToListButtonPartial")
+</p>
