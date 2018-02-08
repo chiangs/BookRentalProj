@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -64,14 +66,96 @@ namespace BookRentalProj.Controllers
                 : "";
 
             var userId = User.Identity.GetUserId();
-            var model = new IndexViewModel
+
+            // Need the user object from the db to provide the information in the VM
+            using (var db = ApplicationDbContext.Create())
+            {
+                //Find the first user that id matches and assign to userInDb
+                var userInDb = db.Users.First(u => u.Id.Equals(userId));
+
+                var model = new IndexViewModel
             {
                 HasPassword = HasPassword(),
                 PhoneNumber = await UserManager.GetPhoneNumberAsync(userId),
                 TwoFactor = await UserManager.GetTwoFactorEnabledAsync(userId),
                 Logins = await UserManager.GetLoginsAsync(userId),
-                BrowserRemembered = await AuthenticationManager.TwoFactorBrowserRememberedAsync(userId)
+                BrowserRemembered = await AuthenticationManager.TwoFactorBrowserRememberedAsync(userId),
+                // add the additional user object properties here
+                Id = userInDb.Id,
+                FirstName = userInDb.FirstName,
+                LastName = userInDb.LastName,
+                Phone = userInDb.Phone,
+                MembershipTypeId = userInDb.MembershipTypeId,
+                BirthDate = userInDb.BirthDate,
+                Email = userInDb.Email,
+                Disable = userInDb.Disable,
+                MembershipTypes = db.MembershipTypes.ToList()
             };
+            return View(model);
+            }
+        }
+
+        //
+        // GET: /Manage/Edit
+        public async Task<ActionResult> Edit(ManageMessageId? message)
+        {
+            var userId = User.Identity.GetUserId();
+
+            // Need the user object from the db to provide the information in the VM
+            using (var db = ApplicationDbContext.Create())
+            {
+                //Find the first user that id matches and assign to userInDb
+                var userInDb = db.Users.First(u => u.Id.Equals(userId));
+
+                var model = new IndexViewModel
+                {
+                    HasPassword = HasPassword(),
+                    PhoneNumber = await UserManager.GetPhoneNumberAsync(userId),
+                    TwoFactor = await UserManager.GetTwoFactorEnabledAsync(userId),
+                    Logins = await UserManager.GetLoginsAsync(userId),
+                    BrowserRemembered = await AuthenticationManager.TwoFactorBrowserRememberedAsync(userId),
+                    // add the additional user object properties here
+                    Id = userInDb.Id,
+                    FirstName = userInDb.FirstName,
+                    LastName = userInDb.LastName,
+                    Phone = userInDb.Phone,
+                    MembershipTypeId = userInDb.MembershipTypeId,
+                    BirthDate = userInDb.BirthDate,
+                    Email = userInDb.Email,
+                    Disable = userInDb.Disable,
+                    MembershipTypes = db.MembershipTypes.ToList()
+                };
+                return View(model);
+            }
+        }
+        
+        //
+        // POST: /Manage/Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(IndexViewModel model)
+        {
+            using (var db = ApplicationDbContext.Create())
+            {
+
+                if (ModelState.IsValid)
+                {
+                    var userInDb = db.Users.First(x => x.Id.Equals(model.Id));
+                    userInDb.FirstName = model.FirstName;
+                    userInDb.LastName = model.LastName;
+                    userInDb.BirthDate = model.BirthDate;
+                    userInDb.Phone = model.Phone;
+                    userInDb.Email = model.Email;
+                    userInDb.Disable = model.Disable;
+
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    model.MembershipTypes = db.MembershipTypes.ToList();
+                }
+            }
             return View(model);
         }
 

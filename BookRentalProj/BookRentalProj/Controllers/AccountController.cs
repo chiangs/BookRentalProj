@@ -9,6 +9,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using BookRentalProj.Models;
+using BookRentalProj.Utility;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace BookRentalProj.Controllers
 {
@@ -139,7 +141,16 @@ namespace BookRentalProj.Controllers
         [AllowAnonymous]
         public ActionResult Register()
         {
-            return View();
+            // Pass in the view model
+            using (var db = ApplicationDbContext.Create())
+            {
+                RegisterViewModel newUser = new RegisterViewModel
+                {
+                    MembershipTypes = db.MembershipTypes.ToList(),
+                    BirthDate = DateTime.Now,
+                };
+                return View(newUser);
+            }
         }
 
         //
@@ -151,11 +162,43 @@ namespace BookRentalProj.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    BirthDate = model.BirthDate,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    Phone = model.Phone,
+                    MembershipTypeId = model.MembershipTypeId,
+                    Disable = false
+                };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
+                    using (var db = ApplicationDbContext.Create())
+                    {
+                        model.MembershipTypes = db.MembershipTypes.ToList();
+
+                        var roleStore = new RoleStore<IdentityRole>(new ApplicationDbContext());
+                        var roleManager = new RoleManager<IdentityRole>(roleStore);
+                        var membership = model.MembershipTypes.SingleOrDefault(m => m.Id == model.MembershipTypeId).Name.ToString();
+
+                        if (membership.ToLower().Contains("admin"))
+                        {
+                            // admin
+                            await roleManager.CreateAsync(new IdentityRole(StaticDetails.AdminUserRole));
+                            await UserManager.AddToRoleAsync(user.Id, StaticDetails.AdminUserRole);
+                        }
+                        else
+                        {
+                            // customer
+                            await roleManager.CreateAsync(new IdentityRole(StaticDetails.EndUserRole));
+                            await UserManager.AddToRoleAsync(user.Id, StaticDetails.EndUserRole);
+                        }
+                    }
+                        //sign in
+                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                     
                     // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
@@ -169,6 +212,7 @@ namespace BookRentalProj.Controllers
             }
 
             // If we got this far, something failed, redisplay form
+            model.MembershipTypes = ApplicationDbContext.Create().MembershipTypes.ToList();
             return View(model);
         }
 

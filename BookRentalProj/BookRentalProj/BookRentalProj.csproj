@@ -195,6 +195,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\MembershipTypeController.cs" />
+    <Compile Include="Extensions\DateRangeAttribute.cs" />
     <Compile Include="Extensions\ThumbnailExtension.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -222,6 +223,7 @@
     <Compile Include="Models\Thumbnail.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Utility\StaticDetails.cs" />
     <Compile Include="ViewModels\BookViewModel.cs" />
     <Compile Include="ViewModels\ThumbnailBoxViewModel.cs" />
   </ItemGroup>
@@ -313,6 +315,7 @@
     <Content Include="Views\MembershipType\Edit.cshtml" />
     <Content Include="Views\MembershipType\Index.cshtml" />
     <Content Include="Views\Shared\_ThumbnailAreaPartial.cshtml" />
+    <Content Include="Views\Manage\Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
